@@ -28,7 +28,7 @@ def baixar_imagem(url, caminho_arquivo):
                 stream=True
             )
 
-            # Sucesso
+            # Download realizado com sucesso
             if response.status_code == 200:
                 with open(caminho_arquivo, "wb") as f:
                     for chunk in response.iter_content(1024):
@@ -36,7 +36,7 @@ def baixar_imagem(url, caminho_arquivo):
 
                 return True
 
-            # Rate limit
+            # Muitas requisições
             elif response.status_code == 429:
                 espera = (tentativa + 1) * 10
                 print(f"HTTP 429, aguardando {espera}s...")
@@ -52,51 +52,78 @@ def baixar_imagem(url, caminho_arquivo):
 
     return False
 
+
 def baixar_imagens(csv_path, pasta_destino):
     os.makedirs(pasta_destino, exist_ok=True)
 
     df = pd.read_csv(csv_path)
 
+    # Verifica se as colunas existem
     if "foto_url" not in df.columns:
         print("Coluna 'foto_url' não encontrada.")
         return
 
+    if "id" not in df.columns:
+        print("Coluna 'id' não encontrada.")
+        return
+
     total = len(df)
 
-    for i, url in enumerate(df["foto_url"]):
-        if pd.isna(url):
+    # Percorre linha por linha
+    for i, row in df.iterrows():
+
+        url = row["foto_url"]
+        id_imagem = row["id"]
+
+        # Ignora valores vazios
+        if pd.isna(url) or pd.isna(id_imagem):
             continue
 
         url = str(url).strip()
 
+        # Descobre extensão da imagem
         parsed = urlparse(url)
         extensao = os.path.splitext(parsed.path)[1]
 
+        # Caso não exista extensão
         if extensao == "":
             extensao = ".jpg"
 
-        nome_arquivo = f"imagem_{i+1}{extensao}"
-        caminho_arquivo = os.path.join(pasta_destino, nome_arquivo)
+        # Nome do arquivo usando o ID
+        nome_arquivo = f"{id_imagem}{extensao}"
 
-        print(f"[{i+1}/{total}] Baixando...")
+        caminho_arquivo = os.path.join(
+            pasta_destino,
+            nome_arquivo
+        )
 
-        sucesso = baixar_imagem(url, caminho_arquivo)
+        print(f"[{i+1}/{total}] Baixando {nome_arquivo}...")
+
+        sucesso = baixar_imagem(
+            url,
+            caminho_arquivo
+        )
 
         if sucesso:
             print(f"OK: {nome_arquivo}")
         else:
             print(f"Falhou: {url}")
 
-        # Pausa aleatória entre downloads
+        # Pequena pausa entre downloads
         time.sleep(random.uniform(2, 5))
 
+
 if __name__ == "__main__":
+
     if len(sys.argv) != 3:
         print("Uso:")
-        print("python baixar_imagens.py arquivo.csv pasta_destino")
+        print("python download_images.py arquivo.csv pasta_destino")
         sys.exit(1)
 
     csv_path = sys.argv[1]
     pasta_destino = sys.argv[2]
 
-    baixar_imagens(csv_path, pasta_destino)
+    baixar_imagens(
+        csv_path,
+        pasta_destino
+    )
