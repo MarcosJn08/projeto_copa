@@ -11,11 +11,11 @@ from google.cloud import storage
 # CONFIGURACOES — edite apenas esta secao
 # =============================================================
 # caminho para o seu arquivo .json de credenciais do GCP
-CREDENTIALS_PATH = "credenciais.json" 
+CREDENTIALS_PATH = "/home/marcos/Área de trabalho/BD2/projeto_copa/projeto-copa-marcos-497500-a9ece0421958.json" 
 # nome do bucket que voce criou no Datalake para armazenar as imagens  
-BUCKET_NAME      = "bucket-copa"
+BUCKET_NAME      = "bucket-copa-marcos"
 # pasta local onde estao as imagens que voce quer enviar para o GCS    
-PASTA_IMAGENS    = "images" 
+PASTA_IMAGENS    = "/home/marcos/Área de trabalho/BD2/projeto_copa/imagens" 
 # prefixo (pasta) dentro do bucket onde as imagens serao armazenadas no GCS           
 DESTINO_GCS      = "imagens_jogadores/"           
 
